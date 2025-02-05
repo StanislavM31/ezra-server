@@ -11,7 +11,7 @@ export class DeedsController {
   }
   @Get(':id')
   getAllMyGoodDeeds(@Param('id') id: string): any {
-    return this.deedsService.getAllMyGoodDeeds(id);
+    return this.deedsService.getAllDeedsByUser(id);
   }
 }
 
