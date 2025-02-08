@@ -1,6 +1,9 @@
-import {IsString, IsBoolean} from 'class-validator'
+import {IsString, IsBoolean, IsNumber} from 'class-validator'
 
 export class GoodDeedDto {
+    @IsNumber()
+    id?: number;
+
     @IsString()
     deed: string;
 
@@ -11,5 +14,5 @@ export class GoodDeedDto {
     comments?: string;
 
     @IsBoolean()
-    done: boolean;
+    isDone: boolean;
 }
