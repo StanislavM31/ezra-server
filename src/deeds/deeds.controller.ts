@@ -17,12 +17,20 @@ export class DeedsController {
   @Post('deeds')
   @UsePipes(new ValidationPipe())
   create(@Body() dto: GoodDeedDto){
-    return this.deedsService.createDeedInAll(dto)
+    try {
+      return this.deedsService.createDeedInAll(dto)
+    } catch (error) {
+      return error.message;
+    }
   }
 
   @Patch(':id')
   makeDeedDone(@Param('id') id: number) {
-    return this.deedsService.makeDeedIsDone(id)
+    try {
+      return this.deedsService.makeDeedIsDone(id)
+    } catch (error) {
+      return (error as Error).message;
+    }
   }
 
 }
