@@ -34,6 +34,10 @@ export class DeedsService {
         updatedDeed.isDone = !updatedDeed.isDone;
         return updatedDeed;
     }
+    removeDeed(id: number) {
+        const updatedDeed = this.goodDeeds.filter((item) => item.id !== +id)
+        return updatedDeed;
+    }
 
     private goodDeeds: GoodDeed[] = [
         {
