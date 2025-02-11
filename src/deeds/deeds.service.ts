@@ -30,6 +30,7 @@ export class DeedsService {
     }
 
     makeDeedIsDone(id: number) {
+        if(!id) throw new Error("no id ??");
         const updatedDeed = this.goodDeeds.find((item) => item.id === +id)
         updatedDeed.isDone = !updatedDeed.isDone;
         return updatedDeed;
