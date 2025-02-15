@@ -2,6 +2,8 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, UsePipes, Validation
 import { DeedsService } from './deeds.service';
 import { GoodDeed } from './deeds.service';
 import { GoodDeedDto } from 'src/dto/deed.dto';
+import { UsersService } from 'src/users/users.service';
+import { CreateUserDto } from 'src/dto/CreateUserDto.dto';
 
 @Controller('deeds')
 export class DeedsController {
@@ -41,5 +43,16 @@ export class DeedsController {
     }
   }
 
+}
+
+@Controller('users')
+export class UserController{
+  constructor (private userService: UsersService) {}
+
+  @Post()
+  createUser(@Body() createUserDto: CreateUserDto){
+    console.log(createUserDto);
+    return this.userService.createUser(createUserDto)
+  }
 }
 
