@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, Request } from '@nestjs/common';
 import { ItemService } from './item.service';
 import { CreateItemDto } from './create-item.dto';
 import { UpdateItemDto } from './update-item.dto';
@@ -8,9 +8,10 @@ export class ItemController {
   constructor(private readonly itemService: ItemService) {}
 
   @Post()
-  create(@Body() createItemDto: CreateItemDto) {
-    // return this.itemService.create(createItemDto);
-    return 'create';
+  // @UseGuards(AuthGuard('jwt')) // Раскомментируйте, если используете JWT
+  create(@Request() req, @Body() createItemDto: CreateItemDto) {
+    const userId = req.user?.id || 1; // Для теста userId=1, в реальном проекте берётся из токена
+    return this.itemService.create({ ...createItemDto, userId });
   }
 
   @Get()
