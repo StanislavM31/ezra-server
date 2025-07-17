@@ -1,5 +1,4 @@
-// DTO для логина пользователя
 export class LoginUserDto {
-  username: string;
-  password: string;
+  readonly name: string;
+  readonly password: string;
 }

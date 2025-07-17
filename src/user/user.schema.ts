@@ -1,8 +1,7 @@
 import { Schema } from 'mongoose';
 
 export const UserSchema = new Schema({
-  username: { type: String, required: true, unique: true },
+  name: { type: String, required: true },
   password: { type: String, required: true },
-  tag: { type: String, required: true, unique: true },
-  rating: { type: Number, default: 0 },
+  friends: [{ type: Schema.Types.ObjectId, ref: 'User' }]
 });
