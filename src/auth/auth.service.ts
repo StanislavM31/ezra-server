@@ -1,31 +1,62 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { User } from '../users/schemas/user.schema';
 import * as bcrypt from 'bcrypt';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
-  private users: { id: number; username: string; password: string }[] = [];
+  constructor(
+    @InjectModel(User.name) private readonly userModel: Model<User>,
+  ) {}
 
-  async register(username: string, password: string) {
-    const existing = this.users.find(user => user.username === username);
+  async register(registerDto: RegisterDto): Promise<User> {
+    const { username, password } = registerDto;
+
+    
+    const existing = await this.userModel.findOne({ username });
     if (existing) {
       throw new Error('User already exists');
     }
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = { id: Date.now(), username, password: hashedPassword };
-    this.users.push(user);
+
+    
+    const hashedPassword = await bcrypt.hash(password, 1);
+    const user = new this.userModel({ 
+      username,
+      password: hashedPassword,
+    });
+    
+    return user.save();
+  }
+
+  async validateUser(loginDto: LoginDto): Promise<User> {
+    const user = await this.userModel.findOne({ username: loginDto.username });
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const isValid = await bcrypt.compare(loginDto.password, user.password);
+    if (!isValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
     return user;
   }
 
-  async validateUser(username: string, password: string) {
-    const user = this.users.find(user => user.username === username);
-    if (!user) {
-      return null;
-    }
-    const isValid = await bcrypt.compare(password, user.password);
-    return isValid ? user : null;
-  }
+  async login(user: User) {
+    const payload = { 
+      username: user.username, 
+      sub: user._id 
+    };
 
-  async login(user: any) {
-    return { message: 'Logged in', token: `fake-jwt-token-for-${user.id}`, user };
+    return {
+      access_token: `fake-jwt-token-for-${user._id}`,
+      user: {
+        id: user._id,
+        username: user.username,
+      },
+    };
   }
 }

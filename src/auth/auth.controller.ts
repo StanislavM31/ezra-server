@@ -1,26 +1,30 @@
-import { Controller, Post, Body, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, UsePipes, ValidationPipe, HttpException, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Post('register')
-  async register(@Body() body: { username: string; password: string }) {
+  @UsePipes(new ValidationPipe())
+  async register(@Body() registerDto: RegisterDto) {
     try {
-      const user = await this.authService.register(body.username, body.password);
+      const user = await this.authService.register(registerDto);
       return this.authService.login(user);
     } catch (error) {
-      throw new HttpException('Registration failed', HttpStatus.BAD_REQUEST);
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 
-  @Post('login')
-  async login(@Body() body: { username: string; password: string }) {
-    const user = await this.authService.validateUser(body.username, body.password);
-    if (!user) {
-      throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
-    }
-    return this.authService.login(user);
+@Post('login')
+@UsePipes(new ValidationPipe())
+async login(@Body() loginDto: LoginDto) {
+  const user = await this.authService.validateUser(loginDto);
+  if (!user) {
+    throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
   }
+  return this.authService.login(user);
+}
 }
