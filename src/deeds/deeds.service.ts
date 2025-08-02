@@ -8,11 +8,12 @@ import { CreateDeedDto } from './dto/create-deed.dto';
 export class DeedsService {
   constructor(
     @InjectModel(Deed.name) private deedModel: Model<Deed>,
-  ) { }
+  ) {}
 
-  async create(dto: CreateDeedDto) {
+  async create(dto: CreateDeedDto & { owner: string }) {
     const createdDeed = new this.deedModel(dto);
     return createdDeed.save();
+    //попробовать переделать на DeedResponseDto
   }
 
   async findByOwner(owner: string) {
@@ -23,30 +24,11 @@ export class DeedsService {
     return this.deedModel.findById(id).exec();
   }
 
-  async remove(id: string) {
-    const deletedDeed = await this.deedModel.findOneAndDelete({ _id: id }).exec();
+  async remove(id: string, owner: string) {
+    const deletedDeed = await this.deedModel.findOneAndDelete({ _id: id, owner }).exec();
     if (!deletedDeed) {
-      throw new NotFoundException('Deed not found');
+      throw new NotFoundException('Deed not found or not authorized');
     }
     return deletedDeed;
-  }
-
-  private deeds: { id: number; title: string; description: string; ownerId: number }[] = [];
-
-  createDeed(title: string, description: string, ownerId: number) {
-    const deed = { id: Date.now(), title, description, ownerId };
-    this.deeds.push(deed);
-    return deed;
-  }
-
-  deleteDeed(id: string, ownerId: number) {
-    const idx = this.deeds.findIndex(
-      deed => deed.id === Number(id) && deed.ownerId === ownerId,
-    );
-    if (idx === -1) {
-      return { message: 'Deed not found or not authorized' };
-    }
-    this.deeds.splice(idx, 1);
-    return { message: 'Deed deleted' };
   }
 }

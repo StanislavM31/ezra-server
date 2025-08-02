@@ -1,4 +1,4 @@
-import { Controller, Post, Delete, Param, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Body, UseGuards, Req } from '@nestjs/common';
 import { DeedsService } from './deeds.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
@@ -8,20 +8,26 @@ export class DeedsController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  createDeed(@Body() body: { title: string; description: string }) {
-    const dummyUserId = 1;
-    return this.deedsService.createDeed(body.title, body.description, dummyUserId);
+  async createDeed(@Body() body: { title: string; description: string }, @Req() req) {
+    const owner = req.user.userId;
+    return this.deedsService.create({
+      title: body.title,
+      description: body.description,
+      owner
+    });
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  deleteDeed(@Param('id') id: string) {
-    const dummyUserId = 1;
-    return this.deedsService.deleteDeed(id, dummyUserId);
+  async deleteDeed(@Param('id') id: string, @Req() req) {
+    const owner = req.user.userId;
+    return this.deedsService.remove(id, owner);
   }
   
-  @Delete(':id')
-  async remove(@Param('id') id: string) {
-    return this.deedsService.remove(id);
+  @UseGuards(JwtAuthGuard)
+  @Get()
+  async getDeeds(@Req() req) {
+    const owner = req.user.userId;
+    return this.deedsService.findByOwner(owner);
   }
 }

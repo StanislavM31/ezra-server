@@ -1,17 +1,19 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Document } from 'mongoose';
+
+export type DeedDocument = Deed & Document;
 
 // MongoDB Deed schema
 @Schema({ timestamps: true })
-export class Deed extends Document {
+export class Deed {
   @Prop({ required: true })
   title: string;
 
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  owner: Types.ObjectId;
+  @Prop()
+  description: string;
 
-  @Prop({ default: Date.now })
-  createdAt: Date;
+  @Prop({ required: true })
+  owner: string;
 }
 
 export const DeedSchema = SchemaFactory.createForClass(Deed);

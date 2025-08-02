@@ -5,11 +5,13 @@ import { User } from '../users/schemas/user.schema';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<User>,
+    private readonly jwtService: JwtService,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<User> {
@@ -46,13 +48,9 @@ export class AuthService {
   }
 
   async login(user: User) {
-    const payload = { 
-      username: user.username, 
-      sub: user._id 
-    };
-
+    const payload = { username: user.username, sub: user._id };
     return {
-      access_token: `fake-jwt-token-for-${user._id}`,
+      access_token: this.jwtService.sign(payload),
       user: {
         id: user._id,
         username: user.username,

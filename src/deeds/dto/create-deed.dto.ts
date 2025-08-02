@@ -1,1 +1,4 @@
-export class CreateDeedDto {}
+export class CreateDeedDto {
+  title: string;
+  description?: string;
+}
